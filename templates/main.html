@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>(Home) NLP Based Resume Parser </title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    .btn-light {
+      background-color: #edf4fb !important;
+      border-radius: 15px !important;
+      border-color: #82bcf7;
+      margin: 5px 2px 5px 2px;
+    }
+  </style>
+</head>
+
+<body style="background-color: lightgrey">
+
+  <div class="container mt-3">
+    <h2>NLP Based Resume Parser</h2>
+    <p>This CV Parser can extract Name, Phone, Designation, Degree, Skills and University, address, date of birth,
+      companies worked with and duration details.</p>
+
+    <form action="" method="post" enctype="multipart/form-data" id="resumeform">
+      <div class="custom-file mb-3">
+        <input type="file" class="custom-file-input" id="customFile" name="filename">
+        <label class="custom-file-label" for="customFile">Upload Resume</label>
+      </div>
+
+      <div class="mt-3">
+        <input type="submit" class="btn btn-primary" id="submitcv">
+        <button class="btn btn-primary" onClick="history.go(0);">Refresh Page</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="container mt-3">
+    <table class="table" id="res-table" style="background-color: white !important; visibility: hidden;">
+      <thead>
+        <tr>
+          <th scope="col" colspan="2" class="text-center no-border" id="hed"
+            style="display:none;border-bottom:0px !important">NLP based Resume Parser in Python</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr id="skl" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">Skills : </th>
+          <td width="70%" id="skill_set"></td>
+        </tr>
+
+        <tr id="nme" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">Name : </th>
+          <td width="70%" id="name"></td>
+        </tr>
+
+        <tr id="yoe" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">Years of Experience : </th>
+          <td width="70%" id="years_of_exp"></td>
+        </tr>
+
+        <tr id="des" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">Designation : </th>
+          <td width="70%" id="dsgnation"></td>
+        </tr>
+
+        <tr id="deg" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">Degree : </th>
+          <td width="70%" id="degree"></td>
+        </tr>
+
+        <tr id="cwa" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">Companies worked at : </th>
+          <td width="70%" id="comp_worked_at"></td>
+        </tr>
+
+        <tr id="g_yr" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">Graduation Year : </th>
+          <td width="70%" id="grad_year"></td>
+        </tr>
+
+        <tr id="c_nme" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">College Name : </th>
+          <td width="70%" id="clg_name"></td>
+        </tr>
+
+        <tr id="loc" style="display: none; visibility: hidden;" width="100%">
+          <th width="30%" scope="row">Location : </th>
+          <td width="70%" id="location"></td>
+        </tr>
+
+      </tbody>
+    </table>
+    <!-- <span class="btn btn-light" style="font-size: small">Oxbridge Digital (PHP</span> -->
+    <!-- <div class="row">
+        <div class="col-sm-2">Skills</div>
+        <div class="col-sm-10" id="skill_set">
+            <span class="btn btn-light" style="font-size: small">Oxbridge Digital (PHP</span>
+        </div>
+    </div> -->
+  </div>
+
+  <script>
+    // Add the following code if you want the name of the file appear on select
+    $(".custom-file-input").on("change", function () {
+      var fileName = $(this).val().split("\\").pop();
+      $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+  </script>
+
+  <script>
+
+    // function process_request(response_json){
+
+    //         for (let entity of response_json.entities) {
+    //                 if (entity.name == 'Skills')(
+    //                     console.log(entity)
+    //                 )
+    //                 // ...use `element`...
+    //             }
+    //     }
+    $("#resumeform").submit(function (e) {
+      e.preventDefault();
+      document.getElementById("hed").style.display = "table-cell";
+      let skill_set = document.getElementById('skill_set');
+      let name = document.getElementById('name');
+      let dsgnation = document.getElementById('dsgnation');
+      let degree = document.getElementById('degree');
+      let grad_year = document.getElementById('grad_year');
+      let clg_name = document.getElementById('clg_name');
+      let location = document.getElementById('location');
+      let years_of_exp = document.getElementById('years_of_exp');
+      let comp_worked_at = document.getElementById('comp_worked_at');
+
+
+      const skill_list = document.createDocumentFragment();
+      const name_list = document.createDocumentFragment();
+      const dsgnation_list = document.createDocumentFragment();
+      const degree_list = document.createDocumentFragment();
+      const grad_year_list = document.createDocumentFragment();
+      const clg_name_list = document.createDocumentFragment();
+      const location_list = document.createDocumentFragment();
+      const years_of_exp_list = document.createDocumentFragment();
+      const comp_worked_at_list = document.createDocumentFragment();
+
+
+      let filename = customFile.files[0];
+      let respone_json;
+
+
+      // var bodyContent = new FormData();
+      var bodyContent = new FormData($('#resumeform')[0]);
+
+      // bodyContent.append("resume", filename);
+      // bodyContent.append('resume', $('#customFile').prop('files')[0]);
+      // bodyContent.append('resume', $('#customFile')[0].files[0]);
+
+      console.log(bodyContent)
+
+      $.ajax({
+        type: 'POST',
+        url: "/predict",
+        data: new FormData(document.getElementById("resumeform")),
+        enctype: 'multipart/form-data',
+        contentType: false,
+        cache: false,
+        processData: false,
+        success: function (response) {
+          console.log(response);
+          console.log(typeof (response));
+          response_json = response;
+          document.getElementById("res-table").style.visibility = "visible";
+
+
+          let Skills = [];
+          let Name = [];
+          let Designation = [];
+          let Grad_Year = [];
+          let Clg_Name = [];
+          let Degree = [];
+          let Location = [];
+          let Years_Exp = [];
+          let Comp_Worked = [];
+
+
+          for (let entity_data of response_json.entities) {
+            if (entity_data.entity == 'Skills') {
+              Skills.push(entity_data)
+            } else if (entity_data.entity == 'Name') {
+              Name.push(entity_data)
+            } else if (entity_data.entity == 'Designation') {
+              Designation.push(entity_data)
+            } else if (entity_data.entity == 'Degree') {
+              Degree.push(entity_data)
+            } else if (entity_data.entity == 'Graduation Year') {
+              Grad_Year.push(entity_data)
+            } else if (entity_data.entity == 'College Name') {
+              Clg_Name.push(entity_data)
+            } else if (entity_data.entity == 'Location') {
+              Location.push(entity_data)
+            } else if (entity_data.entity == 'Years of Experience') {
+              Years_Exp.push(entity_data)
+            } else if (entity_data.entity == 'Companies worked at') {
+              Comp_Worked.push(entity_data)
+            }
+
+          }
+
+          if (Skills.length >0) {
+            document.getElementById("skl").style.visibility = "visible";
+            document.getElementById("skl").style.display = "table-row";
+
+            Skills.map(function (author) {
+              let skill_bind = document.createElement('span');
+              // console.log(author.text);
+              if ((author.text).length >2){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              skill_list.append(skill_bind);}
+            });
+            skill_set.appendChild(skill_list);
+          }
+
+          if (Name.length >0) {
+            document.getElementById("nme").style.visibility = "visible";
+            document.getElementById("nme").style.display = "table-row";
+
+            Name.map(function (author) {
+              let skill_bind = document.createElement('span');
+              if ((author.text).length >2){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              name_list.append(skill_bind);}
+            });
+            name.appendChild(name_list);
+          }
+
+          if (Designation.length>0) {
+            document.getElementById("des").style.visibility = "visible";
+            document.getElementById("des").style.display = "table-row";
+
+            Designation.map(function (author) {
+              let skill_bind = document.createElement('span');
+              if ((author.text).length >5){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              dsgnation_list.append(skill_bind);}
+            });
+            dsgnation.appendChild(dsgnation_list);
+          }
+
+          if (Grad_Year.length>0) {
+            document.getElementById("g_yr").style.visibility = "visible";
+            document.getElementById("g_yr").style.display = "table-row";
+
+            Grad_Year.map(function (author) {
+              let skill_bind = document.createElement('span');
+              if ((author.text).length >1){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              grad_year_list.append(skill_bind);}
+            });
+            grad_year.appendChild(grad_year_list);
+          }
+
+          if (Clg_Name.length>0) {
+            document.getElementById("c_nme").style.visibility = "visible";
+            document.getElementById("c_nme").style.display = "table-row";
+
+            Clg_Name.map(function (author) {
+              let skill_bind = document.createElement('span');
+              if ((author.text).length >4){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              clg_name_list.append(skill_bind);}
+            });
+            clg_name.appendChild(clg_name_list);
+          }
+
+          if (Degree.length >0) {
+            document.getElementById("deg").style.visibility = "visible";
+            document.getElementById("deg").style.display = "table-row";
+
+            Degree.map(function (author) {
+              let skill_bind = document.createElement('span');
+              if ((author.text).length >3){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              degree_list.append(skill_bind);}
+            });
+            degree.appendChild(degree_list);
+          }
+
+          if (Location.length >0) {
+            document.getElementById("loc").style.visibility = "visible";
+            document.getElementById("loc").style.display = "table-row";
+
+            Location.map(function (author) {
+              let skill_bind = document.createElement('span');
+              if ((author.text).length >=4){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              location_list.append(skill_bind);}
+            });
+            location.appendChild(location_list);
+          }
+
+          if (Comp_Worked.length >0) {
+            document.getElementById("cwa").style.visibility = "visible";
+            document.getElementById("cwa").style.display = "table-row";
+
+            Comp_Worked.map(function (author) {
+              let skill_bind = document.createElement('span');
+              if ((author.text).length >=4){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              comp_worked_at_list.append(skill_bind);}
+            });
+            comp_worked_at.appendChild(comp_worked_at_list);
+          }
+
+          if (Years_Exp.length >0) {
+            document.getElementById("yoe").style.visibility = "visible";
+            document.getElementById("yoe").style.display = "table-row";
+
+            Years_Exp.map(function (author) {
+              let skill_bind = document.createElement('span');
+              if ((author.text).length >2){
+              skill_bind.innerHTML = `${author.text}`;
+              skill_bind.className = 'btn btn-light'
+              years_of_exp_list.append(skill_bind);}
+            });
+            years_of_exp.appendChild(years_of_exp_list);
+          }
+
+
+          // process_request(response_json);
+        }
+      });
+    });
+
+  </script>
+
+</body>
+
+</html>

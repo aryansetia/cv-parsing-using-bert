@@ -1,0 +1,9 @@
+flask==2.1.1
+numpy==1.18.4
+pdfminer.six==20200517
+seqeval==0.0.12
+torch==1.11.0
+tqdm==4.46.0
+transformers==3.0.2
+scikit-learn==0.24.1
+flask-cors
