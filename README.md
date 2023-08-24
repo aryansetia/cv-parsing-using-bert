@@ -1,4 +1,4 @@
-# NLP Based CV Parser Using BERT
+# NLPRecruit - A NLP Based CV Parser Using BERT.
 
 # About
 
