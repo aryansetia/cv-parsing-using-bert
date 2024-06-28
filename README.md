@@ -1,4 +1,4 @@
-# NLPRecruit - A NLP Based CV Parser Using BERT.
+# Talent Insight AI - A NLP Based CV Parser Using BERT.
 
 # About
 
